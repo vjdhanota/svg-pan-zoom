@@ -587,15 +587,16 @@ SvgPanZoom.prototype.init = function(svg, options) {
   this.lastMouseWheelEventTime = Date.now()
   this.setupHandlers()
 }
+
 function throttle (func, interval) {
   var timeout;
   return function() {
-    var context = this, args = arguments;
+    var that = this, args = arguments;
     var later = function () {
       timeout = false;
     };
     if (!timeout) {
-      func.apply(context, args)
+      func.apply(that, args)
       timeout = true;
       setTimeout(later, interval)
     }
@@ -612,41 +613,41 @@ SvgPanZoom.prototype.setupHandlers = function() {
   this.eventListeners = {
     // Mouse down group
     mousedown: function(evt) {
-      var result = throttle(that.handleMouseDown(evt, prevEvt), 100);
+      var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
     }
   , touchstart: function(evt) {
-      var result = throttle(that.handleMouseDown(evt, prevEvt), 100);
+      var result = that.handleMouseDown(evt, prevEvt);
       prevEvt = evt
       return result;
     }
 
     // Mouse up group
   , mouseup: function(evt) {
-      return throttle(that.handleMouseUp(evt), 100);
+      return that.handleMouseUp(evt);
     }
   , touchend: function(evt) {
-      return throttle(that.handleMouseUp(evt), 100);
+      return that.handleMouseUp(evt);
     }
 
     // Mouse move group
   , mousemove: function(evt) {
-      return throttle(that.handleMouseMove(evt), 100);
+      return that.handleMouseMove(evt);
     }
   , touchmove: function(evt) {
-      return throttle(that.handleMouseMove(evt), 100);
+      return that.handleMouseMove(evt);
     }
 
     // Mouse leave group
   , mouseleave: function(evt) {
-      return throttle(that.handleMouseUp(evt), 100);
+      return that.handleMouseUp(evt);
     }
   , touchleave: function(evt) {
-      return throttle(that.handleMouseUp(evt), 100);
+      return that.handleMouseUp(evt);
     }
   , touchcancel: function(evt) {
-      return throttle(that.handleMouseUp(evt), 100);
+      return that.handleMouseUp(evt);
     }
   }
 
@@ -673,7 +674,7 @@ SvgPanZoom.prototype.setupHandlers = function() {
   for (var event in this.eventListeners) {
     // Attach event to eventsListenerElement or SVG if not available
     (this.options.eventsListenerElement || this.svg)
-      .addEventListener(event, this.eventListeners[event], false)
+      .addEventListener(event, throttle(this.eventListeners[event],33.34), false)
   }
 
   // Zoom using mouse wheel
@@ -692,7 +693,7 @@ SvgPanZoom.prototype.enableMouseWheelZoom = function() {
 
     // Mouse wheel listener
     this.wheelListener = function(evt) {
-      return throttle(that.handleMouseWheel(evt), 100);
+      return that.handleMouseWheel(evt);
     }
 
     // Bind wheelListener
