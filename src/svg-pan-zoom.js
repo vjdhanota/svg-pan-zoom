@@ -32,6 +32,8 @@ var optionsDefaults = {
 , onUpdatedCTM: null
 }
 
+
+
 SvgPanZoom.prototype.init = function(svg, options) {
   var that = this
 
@@ -96,6 +98,20 @@ SvgPanZoom.prototype.init = function(svg, options) {
   this.setupHandlers()
 }
 
+function throttle (func, interval) {
+  var timeout;
+  return function() {
+    var that = this, args = arguments;
+    var later = function () {
+      timeout = false;
+    };
+    if (!timeout) {
+      func.apply(that, args)
+      timeout = true;
+      setTimeout(later, interval)
+    }
+  }
+}
 /**
  * Register event handlers
  */
@@ -168,7 +184,7 @@ SvgPanZoom.prototype.setupHandlers = function() {
   for (var event in this.eventListeners) {
     // Attach event to eventsListenerElement or SVG if not available
     (this.options.eventsListenerElement || this.svg)
-      .addEventListener(event, this.eventListeners[event], false)
+      .addEventListener(event, throttle(this.eventListeners[event],100), false)
   }
 
   // Zoom using mouse wheel

@@ -1,4 +1,4 @@
-// svg-pan-zoom v3.5.2
+// svg-pan-zoom v3.5.3
 // https://github.com/ariutta/svg-pan-zoom
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var svgPanZoom = require('./svg-pan-zoom.js');
@@ -522,6 +522,8 @@ var optionsDefaults = {
 , onUpdatedCTM: null
 }
 
+
+
 SvgPanZoom.prototype.init = function(svg, options) {
   var that = this
 
@@ -585,7 +587,20 @@ SvgPanZoom.prototype.init = function(svg, options) {
   this.lastMouseWheelEventTime = Date.now()
   this.setupHandlers()
 }
-
+function throttle (func, interval) {
+  var timeout;
+  return function() {
+    var context = this, args = arguments;
+    var later = function () {
+      timeout = false;
+    };
+    if (!timeout) {
+      func.apply(context, args)
+      timeout = true;
+      setTimeout(later, interval)
+    }
+  }
+}
 /**
  * Register event handlers
  */
@@ -597,41 +612,41 @@ SvgPanZoom.prototype.setupHandlers = function() {
   this.eventListeners = {
     // Mouse down group
     mousedown: function(evt) {
-      var result = that.handleMouseDown(evt, prevEvt);
+      var result = throttle(that.handleMouseDown(evt, prevEvt), 100);
       prevEvt = evt
       return result;
     }
   , touchstart: function(evt) {
-      var result = that.handleMouseDown(evt, prevEvt);
+      var result = throttle(that.handleMouseDown(evt, prevEvt), 100);
       prevEvt = evt
       return result;
     }
 
     // Mouse up group
   , mouseup: function(evt) {
-      return that.handleMouseUp(evt);
+      return throttle(that.handleMouseUp(evt), 100);
     }
   , touchend: function(evt) {
-      return that.handleMouseUp(evt);
+      return throttle(that.handleMouseUp(evt), 100);
     }
 
     // Mouse move group
   , mousemove: function(evt) {
-      return that.handleMouseMove(evt);
+      return throttle(that.handleMouseMove(evt), 100);
     }
   , touchmove: function(evt) {
-      return that.handleMouseMove(evt);
+      return throttle(that.handleMouseMove(evt), 100);
     }
 
     // Mouse leave group
   , mouseleave: function(evt) {
-      return that.handleMouseUp(evt);
+      return throttle(that.handleMouseUp(evt), 100);
     }
   , touchleave: function(evt) {
-      return that.handleMouseUp(evt);
+      return throttle(that.handleMouseUp(evt), 100);
     }
   , touchcancel: function(evt) {
-      return that.handleMouseUp(evt);
+      return throttle(that.handleMouseUp(evt), 100);
     }
   }
 
@@ -677,7 +692,7 @@ SvgPanZoom.prototype.enableMouseWheelZoom = function() {
 
     // Mouse wheel listener
     this.wheelListener = function(evt) {
-      return that.handleMouseWheel(evt);
+      return throttle(that.handleMouseWheel(evt), 100);
     }
 
     // Bind wheelListener
@@ -1397,7 +1412,7 @@ module.exports = {
       var thisDefs = allDefs[i];
       thisDefs.parentNode.insertBefore(thisDefs, thisDefs);
     }
-  }, this.internetExplorerRedisplayInterval)
+  }, this ? this.internetExplorerRedisplayInterval : null)
 
   /**
    * Sets the current transform matrix of an element
