@@ -674,7 +674,7 @@ SvgPanZoom.prototype.setupHandlers = function() {
   for (var event in this.eventListeners) {
     // Attach event to eventsListenerElement or SVG if not available
     (this.options.eventsListenerElement || this.svg)
-      .addEventListener(event, throttle(this.eventListeners[event],5), false)
+      .addEventListener(event, this.eventListeners[event], false)
   }
 
   // Zoom using mouse wheel
@@ -957,7 +957,6 @@ SvgPanZoom.prototype.handleMouseDown = function(evt, prevEvt) {
  * @param  {Event} evt
  */
 SvgPanZoom.prototype.handleMouseMove = function(evt) {
-  console.log('called...');
   if (this.options.preventMouseEventsDefault) {
     if (evt.preventDefault) {
       evt.preventDefault()
@@ -968,8 +967,8 @@ SvgPanZoom.prototype.handleMouseMove = function(evt) {
 
   if (this.state === 'pan' && this.options.panEnabled) {
     // Pan mode
-    var point = SvgUtils.getEventPoint(evt, this.svg).matrixTransform(this.firstEventCTM.inverse())
-      , viewportCTM = this.firstEventCTM.translate(point.x - this.stateOrigin.x, point.y - this.stateOrigin.y)
+    var point = throttle(SvgUtils.getEventPoint(evt, this.svg).matrixTransform(this.firstEventCTM.inverse()),100)
+      , viewportCTM = throttle(this.firstEventCTM.translate(point.x - this.stateOrigin.x, point.y - this.stateOrigin.y), 100)
 
     this.viewport.setCTM(viewportCTM)
   }
