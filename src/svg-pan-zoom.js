@@ -184,7 +184,7 @@ SvgPanZoom.prototype.setupHandlers = function() {
   for (var event in this.eventListeners) {
     // Attach event to eventsListenerElement or SVG if not available
     (this.options.eventsListenerElement || this.svg)
-      .addEventListener(event, throttle(this.eventListeners[event],33.34), false)
+      .addEventListener(event, throttle(this.eventListeners[event],16.667), false)
   }
 
   // Zoom using mouse wheel
